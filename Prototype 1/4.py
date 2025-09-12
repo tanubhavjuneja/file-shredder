@@ -223,12 +223,15 @@ class ShredderUI(QWidget):
         super().__init__()
         self.setWindowTitle("Quantum-Secure File Shredder")
         self.setMinimumSize(760, 420)
-        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)  # modern frameless
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
         self._worker = None
+        self._targets = []  # list of queued files/folders
 
-        # Apply a modern stylesheet (dark, rounded)
+        self.setAcceptDrops(True)  # enable drag & drop
+
+        # Apply stylesheet
         self.setStyleSheet("""
             QWidget {
                 background: qlineargradient(x1:0 y1:0, x2:1 y2:1,
@@ -243,7 +246,8 @@ class ShredderUI(QWidget):
                 padding: 14px;
             }
             QPushButton {
-                background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #2a79ff, stop:1 #155edb);
+                background: qlineargradient(x1:0 y1:0, x2:0 y2:1,
+                    stop:0 #2a79ff, stop:1 #155edb);
                 border: none;
                 padding: 8px 12px;
                 border-radius: 8px;
@@ -258,7 +262,8 @@ class ShredderUI(QWidget):
             }
             QProgressBar::chunk {
                 border-radius: 8px;
-                background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #3bd67a, stop:1 #16a34a);
+                background: qlineargradient(x1:0 y1:0, x2:0 y2:1,
+                    stop:0 #3bd67a, stop:1 #16a34a);
             }
             QTextEdit {
                 background: rgba(255,255,255,0.02);
@@ -268,6 +273,12 @@ class ShredderUI(QWidget):
                 background: rgba(255,255,255,0.03);
                 border-radius: 8px;
                 padding: 6px;
+            }
+            /* Remove arrows from spinbox */
+            QSpinBox::up-button, QSpinBox::down-button {
+                width: 0px;
+                height: 0px;
+                border: none;
             }
         """)
 
@@ -282,7 +293,7 @@ class ShredderUI(QWidget):
         v = QVBoxLayout(card)
         v.setSpacing(12)
 
-        # Title row
+        # Title
         title_row = QHBoxLayout()
         title = QLabel("<b>Quantum-Secure File Shredder</b>")
         title.setStyleSheet("font-size:16px;")
@@ -298,7 +309,7 @@ class ShredderUI(QWidget):
         # Input row
         input_row = QHBoxLayout()
         self.path_edit = QLineEdit()
-        self.path_edit.setPlaceholderText("Select file or folder to shred...")
+        self.path_edit.setPlaceholderText("Select file or folder to shred... or drop them here")
         input_row.addWidget(self.path_edit)
 
         browse_file_btn = QPushButton("Browse File")
@@ -308,12 +319,10 @@ class ShredderUI(QWidget):
         browse_folder_btn = QPushButton("Browse Folder")
         browse_folder_btn.clicked.connect(partial(self._on_browse, file_only=False))
         input_row.addWidget(browse_folder_btn)
-
         v.addLayout(input_row)
 
         # Options row
         opts_row = QHBoxLayout()
-        opts_row.setSpacing(12)
         self.passes_spin = QSpinBox()
         self.passes_spin.setRange(1, 35)
         self.passes_spin.setValue(7)
@@ -325,11 +334,10 @@ class ShredderUI(QWidget):
         opts_row.addStretch()
         v.addLayout(opts_row)
 
-        # Progress and buttons
+        # Progress + buttons
         pb_row = QHBoxLayout()
         self.progress = QProgressBar()
         self.progress.setRange(0, 100)
-        self.progress.setValue(0)
         pb_row.addWidget(self.progress)
 
         self.start_btn = QPushButton("🚀 Start Shredding")
@@ -338,8 +346,8 @@ class ShredderUI(QWidget):
 
         self.cancel_btn = QPushButton("Cancel")
         self.cancel_btn.setObjectName("cancel")
-        self.cancel_btn.clicked.connect(self.cancel_shred)
         self.cancel_btn.setEnabled(False)
+        self.cancel_btn.clicked.connect(self.cancel_shred)
         pb_row.addWidget(self.cancel_btn)
 
         v.addLayout(pb_row)
@@ -350,75 +358,98 @@ class ShredderUI(QWidget):
         self.log.setFixedHeight(180)
         v.addWidget(self.log)
 
-        # Footer
-        footer = QLabel("Note: This is best-effort secure deletion. Physical devices and some filesystems may still allow recovery.")
+        footer = QLabel("Note: This is best-effort secure deletion. Some devices/filesystems may still allow recovery.")
         footer.setStyleSheet("color: #a9b7c6; font-size:11px;")
         v.addWidget(footer)
 
         root.addWidget(card)
 
-        # drag support for frameless window
         self._drag_pos = None
 
-    # ---------- UI helpers ----------
-    def _append_log(self, text: str):
-        self.log.append(text)
-        # autoscroll
-        self.log.verticalScrollBar().setValue(self.log.verticalScrollBar().maximum())
+    # ---------- Drag & Drop ----------
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
 
-    def _on_browse(self, file_only: bool):
-        if file_only:
-            file_path, _ = QFileDialog.getOpenFileName(self, "Select file", os.path.expanduser("~"))
-            if file_path:
-                self.path_edit.setText(file_path)
-        else:
-            folder = QFileDialog.getExistingDirectory(self, "Select folder", os.path.expanduser("~"))
-            if folder:
-                self.path_edit.setText(folder)
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            if os.path.exists(path):
+                self._targets.append(path)
+                self._append_log(f"Added to queue: {path}")
+        if self._targets:
+            self.path_edit.setText("; ".join(self._targets))
 
     # ---------- Thread control ----------
     def start_shred(self):
-        target = self.path_edit.text().strip()
-        if not target:
-            QMessageBox.warning(self, "No target", "Please select a file or folder to shred.")
-            return
-        if not os.path.exists(target):
-            QMessageBox.warning(self, "Not found", "The selected path does not exist.")
+        if not self._targets:
+            target = self.path_edit.text().strip()
+            if not target:
+                QMessageBox.warning(self, "No target", "Please select or drop files/folders.")
+                return
+            self._targets = [target]
+
+        if not all(os.path.exists(p) for p in self._targets):
+            QMessageBox.warning(self, "Not found", "Some selected paths do not exist.")
             return
 
         passes = int(self.passes_spin.value())
         wipe = self.wipe_cb.isChecked()
 
-        # disable controls
         self.start_btn.setEnabled(False)
         self.cancel_btn.setEnabled(True)
-        self._append_log(f"Queued: {target} (passes={passes}, wipe_free={wipe})")
         self.progress.setValue(0)
 
-        # create and start worker thread
+        # Start shredding the first item in queue
+        self._process_next(passes, wipe)
+
+    def _process_next(self, passes, wipe):
+        if not self._targets:
+            self._append_log("Queue finished.")
+            self.start_btn.setEnabled(True)
+            self.cancel_btn.setEnabled(False)
+            return
+
+        target = self._targets.pop(0)
+        self._append_log(f"Queued: {target} (passes={passes}, wipe_free={wipe})")
+
         self._worker = ShredWorker(target=target, passes=passes, wipe_free=wipe)
         self._worker.signals.log.connect(self._append_log)
         self._worker.signals.progress.connect(self.progress.setValue)
         self._worker.signals.file_progress.connect(lambda f: self._append_log(f"Now: {f}"))
-        self._worker.signals.finished.connect(self._on_finished)
+        self._worker.signals.finished.connect(lambda success, msg: self._on_finished(success, msg, passes, wipe))
         self._worker.signals.canceled.connect(lambda: self._append_log("Cancelled."))
         self._worker.start()
 
-    def cancel_shred(self):
-        if self._worker:
-            self._worker.request_stop()
-            self._append_log("Cancel requested...")
-
-    def _on_finished(self, success: bool, message: str):
-        self.start_btn.setEnabled(True)
-        self.cancel_btn.setEnabled(False)
+    def _on_finished(self, success, message, passes, wipe):
         self._append_log(f"Finished: {message}")
         if success:
             QMessageBox.information(self, "Done", message)
         else:
             QMessageBox.warning(self, "Stopped", message)
         self.progress.setValue(100 if success else self.progress.value())
+        self._process_next(passes, wipe)
+    def _append_log(self, text: str):
+        self.log.append(text)
+        self.log.verticalScrollBar().setValue(self.log.verticalScrollBar().maximum())
+    def cancel_shred(self):
+        if self._worker:
+            self._worker.request_stop()
+            self._append_log("Cancel requested...")
+    def _on_browse(self, file_only: bool):
+        if file_only:
+            file_path, _ = QFileDialog.getOpenFileName(self, "Select file", os.path.expanduser("~"))
+            if file_path:
+                self._targets.append(file_path)
+                self._append_log(f"Added to queue: {file_path}")
+        else:
+            folder = QFileDialog.getExistingDirectory(self, "Select folder", os.path.expanduser("~"))
+            if folder:
+                self._targets.append(folder)
+                self._append_log(f"Added to queue: {folder}")
 
+        if self._targets:
+            self.path_edit.setText("; ".join(self._targets))
 
 # --------------------- CLI entry retained --------------------- #
 def run_cli():
