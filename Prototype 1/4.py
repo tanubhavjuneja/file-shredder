@@ -162,7 +162,7 @@ class ShredWorker(QThread):
 class ShredderUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Quantum-Secure File Shredder")
+        self.setWindowTitle("File Shredder")
         self.setMinimumSize(760, 420)
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
@@ -237,7 +237,7 @@ class ShredderUI(QWidget):
         v = QVBoxLayout(card)
         v.setSpacing(12)
         title_row = QHBoxLayout()
-        title = QLabel("<b>Quantum-Secure File Shredder</b>")
+        title = QLabel("<b>File Shredder</b>")
         title.setStyleSheet("font-size:16px;")
         title_row.addWidget(title)
         title_row.addStretch()
@@ -281,7 +281,7 @@ class ShredderUI(QWidget):
         opts_row.addWidget(self.chunk_spin)
         chunk_label = QLabel("MB Chunk")
         opts_row.addWidget(chunk_label)
-        self.wipe_cb = QCheckBox("Wipe free disk space (best-effort)")
+        self.wipe_cb = QCheckBox("Wipe free disk space")
         opts_row.addWidget(self.wipe_cb)
         opts_row.addStretch()
         v.addLayout(opts_row)
@@ -302,9 +302,6 @@ class ShredderUI(QWidget):
         self.log.setReadOnly(True)
         self.log.setFixedHeight(180)
         v.addWidget(self.log)
-        footer = QLabel("Note: This is best-effort secure deletion. Some devices/filesystems may still allow recovery.")
-        footer.setStyleSheet("color: #a9b7c6; font-size:11px;")
-        v.addWidget(footer)
         root.addWidget(card)
         self._drag_pos = None
     def dragEnterEvent(self, event):
@@ -347,17 +344,17 @@ class ShredderUI(QWidget):
         self._worker.signals.log.connect(self._append_log)
         self._worker.signals.progress.connect(self.progress.setValue)
         self._worker.signals.file_progress.connect(lambda f: self._append_log(f"Now: {f}"))
-        self._worker.signals.finished.connect(lambda success, msg: self._on_finished(success, msg, passes, wipe))
+        self._worker.signals.finished.connect(lambda success, msg: self._on_finished(success, msg, passes, wipe, chunk_size))
         self._worker.signals.canceled.connect(lambda: self._append_log("Cancelled."))
         self._worker.start()
-    def _on_finished(self, success, message, passes, wipe):
+    def _on_finished(self, success, message, passes, wipe, chunk_size):
         self._append_log(f"Finished: {message}")
         if success:
             QMessageBox.information(self, "Done", message)
         else:
             QMessageBox.warning(self, "Stopped", message)
         self.progress.setValue(100 if success else self.progress.value())
-        self._process_next(passes, wipe)
+        self._process_next(passes, wipe, chunk_size)
     def _append_log(self, text: str):
         self.log.append(text)
         self.log.verticalScrollBar().setValue(self.log.verticalScrollBar().maximum())

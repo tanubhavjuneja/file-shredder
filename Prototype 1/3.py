@@ -9,8 +9,6 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
-
-# ---------------- Existing Shredder Functions (UNCHANGED) ---------------- #
 def encrypt_file(file_path):
     key = os.urandom(32)
     iv = os.urandom(16)
@@ -24,7 +22,6 @@ def encrypt_file(file_path):
     with open(file_path, "wb") as f:
         f.write(encrypted_data)
     print(f"File {file_path} encrypted before shredding.")
-
 def overwrite_file(file_path, passes=7):
     if not os.path.exists(file_path):
         print(f"Error: File not found: {file_path}")
@@ -48,7 +45,6 @@ def overwrite_file(file_path, passes=7):
                 os.fsync(temp_file.fileno())
             os.remove(temp_path)
     print(f"File '{file_path}' securely deleted with {passes} overwrite passes and randomized renaming.")
-
 def wipe_free_space(directory):
     temp_file = os.path.join(directory, "shred_temp.dat")
     free_space = shutil.disk_usage(directory).free
@@ -63,7 +59,6 @@ def wipe_free_space(directory):
     finally:
         if os.path.exists(temp_file):
             os.remove(temp_file)
-
 def shred_directory(directory, passes=7):
     if not os.path.exists(directory):
         print(f"Error: Directory not found: {directory}")
@@ -77,14 +72,12 @@ def shred_directory(directory, passes=7):
         print(f"Directory '{directory}' securely deleted.")
     except Exception as e:
         print(f"Error deleting directory: {e}")
-
 def start():
     parser = argparse.ArgumentParser(description="Quantum-Secure File Shredder")
     parser.add_argument("target", help="Path to the file or directory to be shredded")
     parser.add_argument("--passes", type=int, default=7, help="Number of overwrite passes (default: 7)")
     parser.add_argument("--wipe-free-space", action="store_true", help="Wipe free disk space")
     args = parser.parse_args()
-
     if os.path.isdir(args.target):
         shred_directory(args.target, args.passes)
     elif os.path.isfile(args.target):
@@ -92,20 +85,15 @@ def start():
     else:
         print(f"Error: Target not found: {args.target}")
         sys.exit(1)
-
     if args.wipe_free_space:
         wipe_free_space(os.path.dirname(args.target))
         print("Free space wiped.")
-
-# ---------------- GUI ---------------- #
 def run_gui():
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
-
     app = ctk.CTk()
     app.title("Quantum-Secure File Shredder")
     app.overrideredirect(True)
-
     window_width = 600
     window_height = 300
     screen_width = app.winfo_screenwidth()
@@ -113,23 +101,19 @@ def run_gui():
     x = (screen_width - window_width) // 2
     y = (screen_height - window_height) // 2
     app.geometry(f"{window_width}x{window_height}+{x}+{y}")
-
     target_path = ctk.StringVar()
     passes_var = ctk.IntVar(value=7) 
     wipe_space_var = ctk.BooleanVar(value=False)
-
     def browse_file():
         file = filedialog.askopenfilename()
         if file:
             target_path.set(file)
             manual_entry.place_forget()
-
     def browse_folder():
         folder = filedialog.askdirectory()
         if folder:
             target_path.set(folder)
             manual_entry.place_forget()
-
     def start_shredding():
         path = target_path.get()
         wipe = wipe_space_var.get()
@@ -154,17 +138,13 @@ def run_gui():
             messagebox.showinfo("Success", "Shredding completed securely.")
         except Exception as e:
             messagebox.showerror("Error", str(e))
-
     bg_frame = ctk.CTkFrame(app, corner_radius=0, fg_color="#0d0d1a")
     bg_frame.place(relx=0, rely=0, relwidth=1, relheight=1)
-
     panel = ctk.CTkFrame(bg_frame, corner_radius=20, fg_color="#1a1a2e")
     panel.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-
     manual_entry = ctk.CTkEntry(panel, textvariable=target_path, width=400, height=35,
                                 placeholder_text="Enter path manually", font=("Arial", 16))
     manual_entry.place_forget()
-
     select_box = ctk.CTkComboBox(
         panel,
         values=["Browse File", "Browse Folder", "Path"],
@@ -175,7 +155,6 @@ def run_gui():
     )
     select_box.set("Select File/Folder or Enter Path")
     select_box.place(relx=0.5, rely=0.1, anchor="n")
-
     def on_select(choice):
         if choice == "Browse File":
             manual_entry.place_forget()
@@ -187,38 +166,28 @@ def run_gui():
             manual_entry.place(relx=0.5, rely=0.25, anchor="n")
             target_path.set("")
             select_box.set("Path")
-
     select_box.configure(command=on_select)
-
-
     passes_label = ctk.CTkLabel(panel, text="Overwrite Passes (Default 7):",
                                 font=("Arial", 16), text_color="#00bfff")
     passes_label.place(relx=0.2, rely=0.4, anchor="w")
     passes_entry = ctk.CTkEntry(panel, textvariable=passes_var, width=80, height=30, font=("Arial", 16))
     passes_entry.place(relx=0.65, rely=0.4, anchor="w")
-
     ctk.CTkCheckBox(panel, text="🧹 Wipe Free Disk Space", variable=wipe_space_var,
                      font=("Arial", 16), fg_color="#3399ff").place(relx=0.5, rely=0.6, anchor="center")
-
     ctk.CTkButton(panel, text="🚀 Start Shredding", border_width=2, border_color="#3399ff",
                   command=start_shredding, width=200, height=45, corner_radius=15,
                   fg_color="#3399ff", hover_color="#2673cc", font=("Arial", 16, "bold")).place(relx=0.5, rely=0.8, anchor="center")
-
     exit_button = ctk.CTkButton(bg_frame, text="🚪 Exit", width=70, height=30,
                                 corner_radius=12, fg_color="#ff6666", hover_color="#ff4d4d",
                                 font=("Arial", 14, "bold"), command=app.destroy)
     exit_button.place(relx=0.98, rely=0.02, anchor="ne")
-
     def move_window(event):
         app.geometry(f'+{event.x_root}+{event.y_root}')
     bg_frame.bind("<B1-Motion>", move_window)
-
     app.mainloop()
     sys.exit(0)
-
-# ---------------- Entry Point ---------------- #
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        start()  # CLI mode
+        start() 
     else:
-        run_gui()  # GUI mode
+        run_gui() 
