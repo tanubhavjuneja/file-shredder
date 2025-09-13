@@ -13,11 +13,7 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QLineEdit, QTextEdit, QProgressBar,
     QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSpinBox, QCheckBox, QFrame
 )
-# --------------------- Low-level secure shred helpers --------------------- #
 def encrypt_file_inplace(file_path: str):
-    """
-    AES-CBC encrypt the file with a random key/iv (key thrown away) to obfuscate plaintext.
-    """
     key = os.urandom(32)
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
@@ -39,13 +35,11 @@ def overwrite_file_once(path: str, chunk_size: int):
             f.flush()
             os.fsync(f.fileno())
             remaining -= write_size
-
 def secure_remove(path: str, passes: int, chunk_size: int):
     if not os.path.exists(path):
         raise FileNotFoundError(path)
     encrypt_file_inplace(path)
     file_size = os.path.getsize(path)
-
     for _ in range(passes):
         with open(path, "wb") as f:
             remaining = file_size
@@ -55,7 +49,6 @@ def secure_remove(path: str, passes: int, chunk_size: int):
                 f.flush()
                 os.fsync(f.fileno())
                 remaining -= write_size
-
     dir_name = os.path.dirname(path) or "."
     for _ in range(passes):
         random_name = os.path.join(dir_name, str(uuid.uuid4()))
@@ -73,7 +66,6 @@ def secure_remove(path: str, passes: int, chunk_size: int):
                 os.remove(random_name)
             except FileNotFoundError:
                 pass
-
 def wipe_free_space(directory: str, chunk_size: int, writer_chunks=5):
     temp_file = os.path.join(directory, "shred_temp.dat")
     free_space = shutil.disk_usage(directory).free
@@ -93,10 +85,10 @@ def wipe_free_space(directory: str, chunk_size: int, writer_chunks=5):
             except Exception:
                 pass
 class ShredSignals(QObject):
-    progress = pyqtSignal(int)            # 0..100 overall
-    log = pyqtSignal(str)                # human-readable log lines
-    finished = pyqtSignal(bool, str)     # success flag, message
-    file_progress = pyqtSignal(str)      # current file being processed
+    progress = pyqtSignal(int) 
+    log = pyqtSignal(str) 
+    finished = pyqtSignal(bool, str) 
+    file_progress = pyqtSignal(str)
     canceled = pyqtSignal()
 class ShredWorker(QThread):
     def __init__(self, target: str, passes: int, wipe_free: bool, chunk_size: int):
@@ -114,7 +106,6 @@ class ShredWorker(QThread):
             if not os.path.exists(self.target):
                 self.signals.finished.emit(False, f"Target not found: {self.target}")
                 return
-            # Build list of files if directory
             file_list = []
             if os.path.isdir(self.target):
                 for root, _, files in os.walk(self.target, topdown=False):
@@ -142,16 +133,14 @@ class ShredWorker(QThread):
                 except Exception as e:
                     self.signals.log.emit(f"Error on {file_path}: {e}")
                 completed_files += 1
-                percent = int((completed_files / total_files) * 80)  # 0..80% for file work
+                percent = int((completed_files / total_files) * 80)
                 self.signals.progress.emit(percent)
-            # remove directories if directory target
             if os.path.isdir(self.target):
                 try:
                     shutil.rmtree(self.target)
                     self.signals.log.emit(f"Removed directory: {self.target}")
                 except Exception as e:
                     self.signals.log.emit(f"Could not remove directory: {e}")
-            # Optional wipe free space (use remainder of progress 80..100)
             if self.wipe_free:
                 self.signals.log.emit("Starting free-space wipe (best-effort).")
                 for i in range(5):
@@ -164,14 +153,12 @@ class ShredWorker(QThread):
                         wipe_free_space(os.path.dirname(self.target) or ".", self.chunk_size)
                     except Exception as e:
                         self.signals.log.emit(f"Free-space wipe error: {e}")
-                    # update progress
                     self.signals.progress.emit(80 + int(((i + 1) / 5) * 20))
                 self.signals.log.emit("Free-space wipe completed.")
             self.signals.progress.emit(100)
             self.signals.finished.emit(True, "Shredding completed successfully.")
         except Exception as e:
             self.signals.finished.emit(False, f"Unhandled error: {e}")
-# --------------------- PyQt6 UI --------------------- #
 class ShredderUI(QWidget):
     def __init__(self):
         super().__init__()
@@ -224,13 +211,11 @@ class ShredderUI(QWidget):
                 border-radius: 8px;
                 padding: 6px;
             }
-            /* Remove arrows from spinbox */
             QSpinBox::up-button, QSpinBox::down-button {
                 width: 0px;
                 height: 0px;
                 border: none;
             }
-            /* ✅ Checkbox fix */
             QCheckBox::indicator {
                 width: 16px;
                 height: 16px;
@@ -251,37 +236,28 @@ class ShredderUI(QWidget):
         card.setObjectName("card")
         v = QVBoxLayout(card)
         v.setSpacing(12)
-        # Title
         title_row = QHBoxLayout()
         title = QLabel("<b>Quantum-Secure File Shredder</b>")
         title.setStyleSheet("font-size:16px;")
         title_row.addWidget(title)
         title_row.addStretch()
-
-        # Minimize
         min_btn = QPushButton("—")
         min_btn.setFixedSize(34, 28)
         min_btn.clicked.connect(self.showMinimized)
         min_btn.setStyleSheet("background: transparent; color: #a9c1ff; font-weight: bold;")
         title_row.addWidget(min_btn)
-
-        # Fullscreen toggle
         fs_btn = QPushButton("⬜")
         fs_btn.setFixedSize(34, 28)
         fs_btn.setCheckable(True)
         fs_btn.clicked.connect(lambda checked: self.showFullScreen() if checked else self.showNormal())
         fs_btn.setStyleSheet("background: transparent; color: #a9c1ff; font-weight: bold;")
         title_row.addWidget(fs_btn)
-
-        # Close
         close_btn = QPushButton("✕")
         close_btn.setFixedSize(34, 28)
         close_btn.clicked.connect(self.close)
         close_btn.setStyleSheet("background: transparent; color: #ffb4b4; font-weight: bold;")
         title_row.addWidget(close_btn)
-
         v.addLayout(title_row)
-
         input_row = QHBoxLayout()
         self.path_edit = QLineEdit()
         self.path_edit.setPlaceholderText("Select file or folder to shred... or drop them here")
@@ -300,8 +276,8 @@ class ShredderUI(QWidget):
         self.passes_spin.setPrefix("Passes: ")
         opts_row.addWidget(self.passes_spin)
         self.chunk_spin = QSpinBox()
-        self.chunk_spin.setRange(1, 1024)   # 1 MB to 1 GB
-        self.chunk_spin.setValue(100)       # default 100 MB
+        self.chunk_spin.setRange(1, 1024)  
+        self.chunk_spin.setValue(100)   
         opts_row.addWidget(self.chunk_spin)
         chunk_label = QLabel("MB Chunk")
         opts_row.addWidget(chunk_label)
@@ -331,7 +307,6 @@ class ShredderUI(QWidget):
         v.addWidget(footer)
         root.addWidget(card)
         self._drag_pos = None
-    # ---------- Drag & Drop ----------
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -343,7 +318,6 @@ class ShredderUI(QWidget):
                 self._append_log(f"Added to queue: {path}")
         if self._targets:
             self.path_edit.setText("; ".join(self._targets))
-    # ---------- Thread control ----------
     def start_shred(self):
         if not self._targets:
             target = self.path_edit.text().strip()
