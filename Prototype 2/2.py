@@ -39,7 +39,7 @@ class ShredWorker(QThread):
             f.write(encrypted_data)
         self.log.emit(f"File {file_path} encrypted.")
     def overwrite_file(self, file_path, passes=7):
-        self.encrypt_file(file_path)
+#        self.encrypt_file(file_path)
         file_size = os.path.getsize(file_path)
         with open(file_path, "r+b") as f:
             for i in range(passes):
