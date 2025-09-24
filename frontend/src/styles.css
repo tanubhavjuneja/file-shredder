@@ -1,0 +1,123 @@
+/* Overlay */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modal */
+.auth-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease;
+  text-align: center;
+}
+
+/* Title */
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+/* Form */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Input */
+.auth-input {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+.auth-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  outline: none;
+}
+
+/* Buttons */
+.auth-btn {
+  padding: 0.85rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.auth-btn:hover {
+  transform: translateY(-2px);
+}
+.btn-login {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+.btn-login:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+.btn-register {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+.btn-register:hover {
+  background: linear-gradient(135deg, #15803d, #166534);
+}
+
+/* Switch */
+.auth-switch {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+.auth-link {
+  background: none;
+  border: none;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.auth-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+/* Cancel */
+.auth-cancel {
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.auth-cancel:hover {
+  text-decoration: underline;
+  color: #374151;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
