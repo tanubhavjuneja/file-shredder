@@ -1,6 +1,8 @@
-// src/components/AuthModal.jsx
-import React, { useState } from "react";
-const AuthModal = ({ mode, setMode, onClose }) => {
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../styles.css";
+
+const AuthModal = ({ mode, setMode, onClose , onLoginSuccess}) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -9,33 +11,70 @@ const AuthModal = ({ mode, setMode, onClose }) => {
     phone: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (mode === "login") {
-      console.log("Login Data:", {
-        username: formData.username,
-        password: formData.password,
-      });
-      // TODO: POST to Django backend /api/login
-    } else {
-      console.log("Register Data:", formData);
-      // TODO: POST to Django backend /api/register
+    setLoading(true);
+    setError("");
+
+    try {
+      if (mode === "login") {
+        const res = await axios.post("http://127.0.0.1:8000/api/login/", {
+          username: formData.username,
+          password: formData.password,
+        });
+        if (res.data.success) {
+          if (onLoginSuccess) onLoginSuccess(res.data.token);
+          alert("Login successful!");
+          onClose();
+        } else {
+          setError(res.data.message || "Login failed");
+        }
+      } else {
+        const res = await axios.post("http://127.0.0.1:8000/api/register/", {
+          username: formData.username,
+          email: formData.email,
+          name: formData.name,
+          password: formData.password,
+          phone: formData.phone,
+        });
+        if (res.data.success) {
+          alert("Registration successful! Please login.");
+          setMode("login");
+        } else {
+          setError(res.data.message || "Registration failed");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    onClose();
   };
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-sm animate-fadeIn">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-          {mode === "login" ? "Login" : "Register"}
-        </h2>
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Login Fields */}
+  return (
+    <div className="auth-modal">
+      <div className="auth-modal-content">
+        <h2>{mode === "login" ? "Login" : "Register"}</h2>
+
+        {error && <p style={{ color: "red", marginBottom: "0.5rem" }}>{error}</p>}
+
+        <form onSubmit={handleSubmit}>
           {mode === "login" ? (
             <>
               <input
@@ -44,7 +83,6 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                 required
               />
               <input
@@ -53,12 +91,10 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                 required
               />
             </>
           ) : (
-            /* Register Fields */
             <>
               <input
                 type="text"
@@ -66,7 +102,6 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-green-300"
                 required
               />
               <input
@@ -75,7 +110,6 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-green-300"
                 required
               />
               <input
@@ -84,7 +118,6 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-green-300"
                 required
               />
               <input
@@ -93,7 +126,6 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-green-300"
                 required
               />
               <input
@@ -102,54 +134,38 @@ const AuthModal = ({ mode, setMode, onClose }) => {
                 placeholder="Phone (Optional)"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-green-300"
               />
             </>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
-            className={`w-full py-2 rounded-lg text-white font-semibold transition ${
-              mode === "login"
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-green-600 hover:bg-green-700"
-            }`}
+            className={mode === "login" ? "login-btn" : "register-btn"}
+            disabled={loading}
           >
-            {mode === "login" ? "Login" : "Register"}
+            {loading ? "Please wait..." : mode === "login" ? "Login" : "Register"}
           </button>
         </form>
 
-        {/* Switch Option */}
-        <div className="mt-4 text-center text-sm text-gray-600">
+        <div className="switch-link">
           {mode === "login" ? (
             <>
               New user?{" "}
-              <button
-                onClick={() => setMode("register")}
-                className="text-green-600 font-medium hover:underline"
-              >
+              <button type="button" onClick={() => setMode("register")}>
                 Register
               </button>
             </>
           ) : (
             <>
               Already a user?{" "}
-              <button
-                onClick={() => setMode("login")}
-                className="text-blue-600 font-medium hover:underline"
-              >
+              <button type="button" onClick={() => setMode("login")}>
                 Login
               </button>
             </>
           )}
         </div>
 
-        {/* Cancel */}
-        <button
-          onClick={onClose}
-          className="mt-4 text-sm text-gray-500 hover:underline w-full"
-        >
+        <button className="cancel-btn" onClick={onClose}>
           Cancel
         </button>
       </div>

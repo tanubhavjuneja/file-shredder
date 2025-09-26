@@ -1,69 +1,145 @@
 // src/pages/CommunityPage.jsx
-import React, { useState } from "react";
-import AuthModal from "../components/AuthModal";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../styles.css";
 
 const CommunityPage = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with real auth later
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState("login"); // "login" or "register"
+  const [discussions, setDiscussions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const token = localStorage.getItem("accessToken");
+
+  // Fetch logged-in user info
+  const fetchUser = async () => {
+    if (!token) return;
+
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/api/user/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      localStorage.removeItem("accessToken"); // token might be invalid
+      setUser(null);
+    }
+  };
+
+  // Fetch previous discussions
+  const fetchDiscussions = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/api/discussions/list");
+      setDiscussions(res.data);
+    } catch (err) {
+      console.error("Failed to fetch discussions:", err);
+      setError("Failed to load discussions.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+    fetchDiscussions();
+  }, []);
+
+  // Logout user
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    setUser(null);
+    window.location.reload(); // redirect to login page
+  };
+
+  // Start a new discussion
+  const handleStartDiscussion = async () => {
+    const title = prompt("Enter discussion title:");
+    if (!title) return;
+    if (!token) {
+      alert("You must be logged in to start a discussion.");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/discussions/create",
+        { title },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDiscussions([res.data, ...discussions]);
+    } catch (err) {
+      console.error("Failed to start discussion:", err);
+      alert("Failed to start discussion.");
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 max-w-lg w-full text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Welcome to the Community
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Connect, share ideas, and start discussions with other members of the project.
-        </p>
-
-        {/* Start Discussion Button */}
-        <button
-          disabled={!isLoggedIn}
-          className={`w-full py-3 rounded-xl font-semibold mb-6 transition ${
-            isLoggedIn
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Start Discussion
-        </button>
-
-        {/* Auth Buttons */}
-        {!isLoggedIn ? (
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => {
-                setAuthMode("login");
-                setShowAuth(true);
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition"
+    <div className="community-container">
+      {/* Header */}
+      <div className="community-header">
+        <h1>Community</h1>
+        {user && (
+          <div className="user-profile-wrapper">
+            {/* Avatar */}
+            <div
+              className="user-avatar"
+              onClick={() => setProfileOpen(!profileOpen)}
             >
-              Login
-            </button>
-            <button
-              onClick={() => {
-                setAuthMode("register");
-                setShowAuth(true);
-              }}
-              className="px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition"
-            >
-              Register
-            </button>
+              {user.username.charAt(0).toUpperCase()}
+            </div>
+
+            {/* Profile Popup */}
+            {profileOpen && (
+              <div className="profile-popup">
+                <p>
+                  <strong>Username:</strong> {user.username}
+                </p>
+                <p>
+                  <strong>Email:</strong> {user.email}
+                </p>
+                {user.phone && (
+                  <p>
+                    <strong>Phone:</strong> {user.phone}
+                  </p>
+                )}
+                <button onClick={handleLogout} className="logout-btn">
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <p className="text-green-600 font-medium">You’re logged in! 🎉</p>
         )}
       </div>
 
-      {/* Auth Popup */}
-      {showAuth && (
-        <AuthModal
-          mode={authMode}
-          setMode={setAuthMode}
-          onClose={() => setShowAuth(false)}
-        />
-      )}
+      {/* Start Discussion Button */}
+      <button
+        className="community-btn community-btn-blue"
+        onClick={handleStartDiscussion}
+        disabled={!user}
+        title={!user ? "Login to start a discussion" : ""}
+      >
+        Start Discussion
+      </button>
+
+      {/* Discussions List */}
+      <div className="discussions-list">
+        {loading ? (
+          <p>Loading discussions...</p>
+        ) : error ? (
+          <p style={{ color: "red" }}>{error}</p>
+        ) : discussions.length === 0 ? (
+          <p>No discussions yet. Start one!</p>
+        ) : (
+          discussions.map((d) => (
+            <div key={d.id} className="discussion-card">
+              <h3>{d.title}</h3>
+              <p>Started by: {d.user.username}</p>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };
