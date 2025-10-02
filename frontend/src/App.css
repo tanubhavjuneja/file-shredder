@@ -1,0 +1,82 @@
+
+
+.App {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Style the form for a clean grid layout */
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 15px 10px; /* Vertical and horizontal spacing */
+  padding: 0 15px; /* Inner padding for the form */
+}
+
+label {
+  display: block; /* Make labels take their own line when needed */
+  font-weight: bold;
+  margin-bottom: 5px;
+  grid-column: 1 / span 1; /* Assign labels to the first column */
+  align-self: center;
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 95%; 
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  grid-column: 2 / span 1; /* Assign inputs to the second column */
+}
+
+/* Style the checkbox row to span both columns */
+.checkbox-row {
+  grid-column: 1 / span 2; /* Make this element span both columns */
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.checkbox-row label {
+  font-weight: normal;
+  margin-bottom: 0;
+  margin-left: 5px;
+}
+
+/* Style the submit button to span both columns and center */
+button[type="submit"] {
+  grid-column: 1 / span 2; /* Make button span both columns */
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
