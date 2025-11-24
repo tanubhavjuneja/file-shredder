@@ -1,293 +1,213 @@
-/* =========================
-   GLOBAL RESET + BASE
-========================= */
-body {
-  font-family: "Inter", sans-serif;
-  background: linear-gradient(135deg, #f0f4f9, #e8ebf3);
+/* ===========================
+   GLOBAL DARK THEME STYLES
+   =========================== */
+
+* {
   margin: 0;
   padding: 0;
-  animation: fadeIn 0.6s ease-in-out;
+  box-sizing: border-box;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+html,
+body {
+  height: 100%;
+  font-family: "Inter", sans-serif;
+  scroll-behavior: smooth;
+
+  /* Dark modern background */
+  background: #0a0a0a; /* Deep charcoal */
+  color: #e0e0e0;      /* Light text default */
 }
 
-/* =========================
-   COMMUNITY PAGE STYLES
-========================= */
-.community-card {
-  background: #ffffff;
-  border: 1px solid #edf2f7;
-  border-radius: 1rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  max-width: 600px;
-  width: 100%;
-  padding: 2rem;
-  text-align: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+/* Scrollbar (dark style) */
+::-webkit-scrollbar {
+  width: 10px;
 }
-/* Community Card Titles */
-.community-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e293b; /* dark slate */
-  margin-bottom: 0.5rem;
+::-webkit-scrollbar-thumb {
+  background: #333; /* Darker thumb */
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1e1e1e; /* Match main background */
 }
 
-.community-subtitle {
-  font-size: 1rem;
-  color: #475569; /* medium slate */
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-}
-/* Centering everything nicely */
-.community-container {
+/* ===========================
+   HEADER
+   =========================== */
+
+/* =====================================
+   DARK GREY HEADER (fixed on top)
+   ===================================== */
+
+header {
+  height: 72px !important;
+  background: rgba(20, 20, 20, 0.9);      /* Dark semi-transparent background */
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #333;          /* Darker border */
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem;
-  background: linear-gradient(135deg, #e0f2fe, #f0f9ff, #e0e7ff);
-}
-
-
-
-.community-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
-}
-
-.community-card h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 1rem;
-}
-
-.community-card p {
-  color: #4b5563;
-  margin-bottom: 1.5rem;
-}
-
-/* Auth buttons */
-.community-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.community-btn {
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  transition: all 0.25s ease;
-  cursor: pointer;
-  border: none;
-}
-
-.community-btn-blue {
-  background: #3b82f6;
-  color: white;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
-}
-
-.community-btn-blue:hover {
-  background: #2563eb;
-  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
-}
-
-.community-btn-green {
-  background: #22c55e;
-  color: white;
-  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.25);
-}
-
-.community-btn-green:hover {
-  background: #16a34a;
-  box-shadow: 0 6px 14px rgba(34, 197, 94, 0.35);
-}
-
-.community-btn-disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-/* =========================
-   AUTH MODAL STYLES
-========================= */
-.auth-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(17, 25, 40, 0.65);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.auth-modal-content {
-  background: #fff;
-  border-radius: 1.25rem;
-  padding: 2rem;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-  animation: scaleIn 0.25s ease-in-out;
-  position: relative;
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.auth-modal-content h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-/* Inputs inside modal */
-.auth-modal-content input {
-  width: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  padding: 0.65rem 0.9rem;
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
-  background: #fafafa;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
-}
-
-.auth-modal-content input:focus {
-  border-color: #3b82f6;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  outline: none;
-}
-
-/* Submit button */
-.auth-modal-content button[type="submit"] {
-  width: 100%;
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  font-weight: 600;
-  color: white;
-  margin-top: 0.5rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.auth-modal-content button.login-btn {
-  background: #3b82f6;
-}
-
-.auth-modal-content button.login-btn:hover {
-  background: #2563eb;
-}
-
-.auth-modal-content button.register-btn {
-  background: #22c55e;
-}
-
-.auth-modal-content button.register-btn:hover {
-  background: #16a34a;
-}
-
-/* Switch links */
-.auth-modal-content .switch-link {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.9rem;
-}
-
-.auth-modal-content .switch-link button {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.auth-modal-content .switch-link button:hover {
-  text-decoration: underline;
-}
-
-/* Cancel button */
-.auth-modal-content .cancel-btn {
-  display: block;
-  margin: 1rem auto 0;
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.auth-modal-content .cancel-btn:hover {
-  color: #111827;
-}
-/* Logged-in message style */
-.logged-in-msg {
-  color: #16a34a; /* green */
-  font-weight: 600;
-  margin-top: 1rem;
-}
-.user-profile-wrapper {
-  position: relative;
-  display: inline-block;
-  margin-left: auto;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #4a90e2;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.profile-popup {
-  position: absolute;
+  position: fixed !important;
+  top: 0;
+  left: 0;
   right: 0;
-  top: 50px;
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  width: 200px;
-  z-index: 100;
-}
-
-.profile-popup p {
-  margin: 0.3rem 0;
-}
-
-.logout-btn {
-  margin-top: 0.5rem;
   width: 100%;
-  padding: 0.4rem;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  z-index: 9999 !important;
 }
 
-.logout-btn:hover {
-  background-color: #c0392b;
+/* Header text (File Shredder) */
+header .title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #00FFFF; /* Electric Blue Accent */
+}
+
+/* Navigation container aligned to the right */
+header nav {                    /* Push nav to the right */
+  display: flex;
+  gap: 20px;
+}
+
+/* ===============================
+   MODERN NAV BUTTONS (DARK THEME)
+   =============================== */
+
+header nav button {
+  background: #1e1e1e;                   /* Dark button background */
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  font-size: 14px;
+  color: #e0e0e0;                       /* Light text */
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+header nav button:hover {
+  background: #00FFFF;                   /* Electric Blue Accent hover */
+  border-color: #00FFFF;
+  color: #121212;                        /* Dark text on accent */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* =====================================
+   UPDATED FOOTER (DARK THEME)
+   ===================================== */
+
+footer {
+  height: 44px !important;
+  background: rgba(20, 20, 20, 0.9);      /* Match header dark background */
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #333;
+  color: #999;                           /* Subtle text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  z-index: 1000;
+}
+
+
+/* ===========================
+   MAIN CONTENT SCROLLING
+   =========================== */
+
+main {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+}
+
+/* ===========================
+   FULLSCREEN SECTIONS (DARK THEME)
+   =========================== */
+
+section[data-snap] {
+  position: relative;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+
+  /* Ensure background is dark & clean */
+  background-color: #0a0a0a;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* DARK OVERLAY — ENSURE LEGIBILITY FOR LIGHT TEXT */
+section[data-snap]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);  /* Dark wash */
+  z-index: 0;
+}
+
+/* Content should stay above overlay */
+section[data-snap] > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Text is already light by default, no color override needed here */
+section h1,
+section h2,
+section h4,
+section p {
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle glow for readability */
+  color: #e0e0e0; /* Explicitly set light color */
+}
+
+/* ===========================
+   FEATURE CARDS (DARK UI)
+   =========================== */
+
+.feature-card {
+  background: rgba(30, 30, 30, 0.8); /* Dark semi-transparent background */
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(6px);
+  transition: 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.feature-card:hover {
+  background: rgba(50, 50, 50, 0.9);
+  border-color: #00FFFF; /* Highlight border with accent */
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2); /* Subtle glow effect */
+}
+
+/* ===========================
+   BUTTONS (General Dark Theme)
+   =========================== */
+
+button,
+a {
+  transition: 0.25s ease !important;
+}
+
+button:hover,
+a:hover {
+  transform: translateY(-2px);
+}
+
+
+/* ===========================
+   RESPONSIVE TEXT
+   =========================== */
+
+@media (max-width: 768px) {
+  section h1 {
+    font-size: 28px;
+  }
+  section h2 {
+    font-size: 24px;
+  }
 }
