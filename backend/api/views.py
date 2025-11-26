@@ -33,10 +33,10 @@ def contact_form(request):
         send_mail(
             subject="We received your message!",
             message=(
-                f"Hi {data['name']},\n\n"
+                f"Hi,\n\n"
                 "Thank you for contacting us. "
                 "Your message has been received and our team will get back to you shortly.\n\n"
-                "Best regards,\nYour Company Team"
+                "Best regards,\nPD Lovers"
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[data["email"]],
