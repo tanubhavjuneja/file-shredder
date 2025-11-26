@@ -6,3 +6,4 @@ dj-database-url
 python-dotenv
 django-cors-headers
 mysqlclient
+djangorestframework
