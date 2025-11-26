@@ -82,7 +82,7 @@ export default function Navbar() {
                             <div className="h-6 w-px bg-slate-700 mx-2"></div>
 
                             <a
-                                href="https://github.com/tarundeep1608/supershredder"
+                                href="https://github.com/tanubhavjuneja/file-shredder"
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-slate-400 hover:text-white transition-colors"
