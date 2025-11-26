@@ -14,7 +14,7 @@ def contact_form(request):
     data = request.data
 
     # Required fields validation
-    required = ["name", "email", "message"]
+    required = ["email", "message"]
     for field in required:
         if field not in data:
             return Response(
@@ -24,7 +24,6 @@ def contact_form(request):
 
     # Save to database
     saved_msg = ContactMessage.objects.create(
-        name=data["name"],
         email=data["email"],
         message=data["message"]
     )
