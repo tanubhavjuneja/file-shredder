@@ -5,7 +5,7 @@
  * Connects to the Django Backend
  */
 
-const API_BASE_URL = 'https://file-shredder.onrender.com/api/v1';
+const API_BASE_URL = 'https://fileshredder.pythonanywhere.com/api/v1';
 
 export const api = {
     submitContactForm: async (data) => {
