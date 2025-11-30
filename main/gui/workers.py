@@ -1,15 +1,36 @@
+"""
+@fileoverview Background Worker Threads for SuperShredder
+
+Provides QThread-based workers for running long-running operations
+in the background without blocking the UI. Includes workers for:
+- Windows file shredding operations
+- Android device wiping operations
+- Device connection status checking
+
+@author Team PD Lovers
+@version 1.0.0
+"""
+
 import os
 import sys
 import shutil
 from PyQt6.QtCore import QThread, pyqtSignal, QObject
 
-# NEW IMPORTS: Refecting the structure change
 from wipers.windows import core as windows_logic
 from wipers.android import orchestrator as android_wiper
 from wipers.android import device_manager
 
 
 class WorkerSignals(QObject):
+    """
+    Defines signals for worker thread communication.
+    
+    Signals:
+        progress: Emits an integer (0-100) for progress updates.
+        log: Emits a string message for logging.
+        finished: Emits (success: bool, message: str) when complete.
+        canceled: Emits when the operation is canceled.
+    """
     progress = pyqtSignal(int)
     log = pyqtSignal(str)
     finished = pyqtSignal(bool, str)
@@ -17,7 +38,31 @@ class WorkerSignals(QObject):
 
 
 class WindowsShredWorker(QThread):
-    def __init__(self, targets, passes, wipe_free, chunk_size):
+    """
+    Background worker for Windows file shredding operations.
+    
+    Performs secure file deletion using encryption and multi-pass
+    overwriting. Supports directories, individual files, and
+    optional free space wiping.
+    
+    Attributes:
+        signals: WorkerSignals instance for thread communication.
+        targets: List of file/directory paths to shred.
+        passes: Number of overwrite passes (1-35).
+        wipe_free: Whether to wipe free disk space after shredding.
+        chunk_size: Size of write chunks in bytes.
+    """
+    
+    def __init__(self, targets: list, passes: int, wipe_free: bool, chunk_size: int):
+        """
+        Initialize the shred worker.
+        
+        Args:
+            targets: List of file/directory paths to shred.
+            passes: Number of overwrite passes.
+            wipe_free: Whether to wipe free space.
+            chunk_size: Size of write chunks in bytes.
+        """
         super().__init__()
         self.signals = WorkerSignals()
         self.targets = targets
@@ -27,12 +72,19 @@ class WindowsShredWorker(QThread):
         self._stop_requested = False
 
     def request_stop(self):
+        """Request the worker to stop at the next safe point."""
         self._stop_requested = True
 
     def run(self):
+        """
+        Execute the shredding operation.
+        
+        Expands directories to individual files, shreds each file,
+        removes empty directories, and optionally wipes free space.
+        """
         completed_files = 0
 
-        # Expand directories
+        # Expand directories to individual file list
         all_files = []
         for target in self.targets:
             if os.path.isdir(target):
@@ -92,13 +144,38 @@ class WindowsShredWorker(QThread):
 
 
 class AndroidWipeWorker(QThread):
+    """
+    Background worker for Android device wiping operations.
+    
+    Executes the Android wipe orchestrator in a background thread,
+    redirecting stdout to emit log signals for UI display.
+    
+    Attributes:
+        signals: WorkerSignals instance for thread communication.
+        confirmation_callback: Callback function for user confirmation.
+    """
+    
     def __init__(self, confirmation_callback):
+        """
+        Initialize the Android wipe worker.
+        
+        Args:
+            confirmation_callback: Function called to confirm wipe action.
+        """
         super().__init__()
         self.signals = WorkerSignals()
         self.confirmation_callback = confirmation_callback
 
     def run(self):
+        """
+        Execute the Android wipe operation.
+        
+        Redirects stdout to capture log output from the orchestrator
+        and emit it as log signals.
+        """
         class StreamToSignal:
+            """Redirects write calls to a Qt signal."""
+            
             def __init__(self, signal):
                 self.signal = signal
 
@@ -106,7 +183,8 @@ class AndroidWipeWorker(QThread):
                 if text.strip():
                     self.signal.emit(text.strip())
 
-            def flush(self): pass
+            def flush(self):
+                pass
 
         original_stdout = sys.stdout
         sys.stdout = StreamToSignal(self.signals.log)
@@ -124,9 +202,24 @@ class AndroidWipeWorker(QThread):
 
 
 class DeviceCheckWorker(QThread):
+    """
+    Background worker for checking Android device connection status.
+    
+    Polls ADB to detect connected devices without blocking the UI.
+    Used for real-time device status updates in the Android tab.
+    
+    Signals:
+        result: Emits (status: str, device_id: str) with connection state.
+    """
     result = pyqtSignal(str, str)
 
     def run(self):
+        """
+        Check for connected Android devices via ADB.
+        
+        Emits the device status ('authorized', 'unauthorized', 'none', 'error')
+        and device ID through the result signal.
+        """
         try:
             status, device_id = device_manager.detect_device_state()
             self.result.emit(status, str(device_id))

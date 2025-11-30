@@ -1,3 +1,20 @@
+"""
+@fileoverview Windows File Shredder Tab UI
+
+Provides the user interface for the Windows file shredding functionality.
+Allows users to select files/folders via drag-and-drop or file browser,
+configure shredding options, and monitor progress.
+
+Features:
+    - Drag-and-drop file selection
+    - Configurable overwrite passes (1-35)
+    - Optional free space wiping
+    - Real-time progress and logging
+
+@author Team PD Lovers
+@version 1.0.0
+"""
+
 import os
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
@@ -8,6 +25,22 @@ from gui.workers import WindowsShredWorker
 
 
 class WindowsTab(QWidget):
+    """
+    Windows File Shredder tab widget.
+    
+    Provides the complete UI for selecting files, configuring shred
+    options, and executing secure file deletion.
+    
+    Attributes:
+        targets: List of file/folder paths queued for shredding.
+        worker: The background shred worker thread.
+        path_display: Text field showing selected targets.
+        spin_passes: Spinbox for configuring overwrite passes.
+        cb_wipe_free: Checkbox for free space wiping option.
+        progress: Progress bar for operation status.
+        log_box: Text area for operation logs.
+    """
+    
     def __init__(self):
         super().__init__()
         self.targets = []
@@ -16,6 +49,12 @@ class WindowsTab(QWidget):
         self.setAcceptDrops(True)
 
     def _init_ui(self):
+        """
+        Initialize the tab's user interface components.
+        
+        Creates the layout with file input area, options panel,
+        action buttons, progress bar, and log output.
+        """
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -50,13 +89,11 @@ class WindowsTab(QWidget):
         input_row.addWidget(btn_folder)
         v_layout.addLayout(input_row)
 
-        # Options
+        # Options row with passes and free space wipe
         opts_row = QHBoxLayout()
 
         self.spin_passes = QSpinBox()
-        # --- CHANGE START: Use Plus/Minus buttons instead of arrows ---
         self.spin_passes.setButtonSymbols(QSpinBox.ButtonSymbols.PlusMinus)
-        # --- CHANGE END ---
         self.spin_passes.setPrefix("Passes: ")
         self.spin_passes.setRange(1, 35)
         self.spin_passes.setValue(3)
@@ -86,17 +123,30 @@ class WindowsTab(QWidget):
         layout.addWidget(card)
 
     def dragEnterEvent(self, event):
+        """Accept drag events containing file URLs."""
         if event.mimeData().hasUrls():
             event.accept()
 
     def dropEvent(self, event):
+        """
+        Handle file drops by adding valid paths to the target list.
+        
+        Args:
+            event: The drop event containing file URLs.
+        """
         for url in event.mimeData().urls():
             path = url.toLocalFile()
             if path and os.path.exists(path):
                 self.targets.append(path)
         self._update_display()
 
-    def _browse(self, file_mode):
+    def _browse(self, file_mode: bool):
+        """
+        Open a file/folder browser dialog.
+        
+        Args:
+            file_mode: True for file selection, False for directory.
+        """
         if file_mode:
             path, _ = QFileDialog.getOpenFileName(self, "Select File")
         else:
@@ -107,10 +157,17 @@ class WindowsTab(QWidget):
             self._update_display()
 
     def _update_display(self):
+        """Update the path display with current target list."""
         self.path_display.setText("; ".join(self.targets))
         self.log_box.append(f"Queue updated: {len(self.targets)} targets.")
 
     def start_shredding(self):
+        """
+        Start the shredding operation in a background thread.
+        
+        Validates that targets are selected, then initializes and
+        starts the WindowsShredWorker with current settings.
+        """
         if not self.targets:
             QMessageBox.warning(self, "Error", "No targets selected.")
             return
@@ -130,7 +187,17 @@ class WindowsTab(QWidget):
         self.worker.signals.finished.connect(self._on_finished)
         self.worker.start()
 
-    def _on_finished(self, success, msg):
+    def _on_finished(self, success: bool, msg: str):
+        """
+        Handle shredding operation completion.
+        
+        Re-enables the UI, clears the target list, and shows
+        a success or error message dialog.
+        
+        Args:
+            success: Whether the operation completed successfully.
+            msg: The completion message to display.
+        """
         self.btn_start.setEnabled(True)
         self.targets.clear()
         self._update_display()

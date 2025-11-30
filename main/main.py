@@ -1,6 +1,23 @@
+"""
+@fileoverview SuperShredder Application Entry Point
+
+This module serves as the main entry point for the SuperShredder desktop application.
+It creates a custom frameless PyQt6 window with a modern dark theme, featuring
+sidebar navigation between Windows file shredding and Android device wiping modules.
+
+Features:
+    - Frameless window with custom title bar and drag support
+    - Dark gradient theme with blue accents
+    - Tabbed interface for Windows/Android operations
+    - Custom window controls (minimize, close)
+
+@author Team PD Lovers
+@version 1.0.0
+"""
+
 import sys
 import os
-import ctypes  # <--- Added for Taskbar Icon Fix
+import ctypes
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QPushButton, QStackedWidget, QLabel, QFrame
@@ -8,45 +25,75 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
 
-# Import UI components
 from gui.theme import STYLESHEET
 from gui.tabs.windows_ui import WindowsTab
 from gui.tabs.android_ui import AndroidTab
 
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+def resource_path(relative_path: str) -> str:
+    """
+    Resolves the absolute path to a resource file.
+    
+    Handles both development environment and PyInstaller bundled executable.
+    When running as a bundled .exe, PyInstaller extracts resources to a
+    temporary folder stored in sys._MEIPASS.
+    
+    Args:
+        relative_path: The relative path to the resource from the app root.
+        
+    Returns:
+        The absolute path to the resource file.
+    """
     try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
-    except Exception:
+    except AttributeError:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
 
 
 class MainWindow(QMainWindow):
+    """
+    Main application window for SuperShredder.
+    
+    Creates a frameless, draggable window with a custom dark theme.
+    Features a sidebar for navigation between Windows and Android tabs,
+    along with custom minimize and close controls.
+    
+    Attributes:
+        btn_windows: Navigation button for Windows File Shredder tab.
+        btn_android: Navigation button for Android Wiper tab.
+        stack: QStackedWidget containing the tab content areas.
+        windows_tab: The Windows file shredding interface.
+        android_tab: The Android device wiping interface.
+    """
+    
     def __init__(self):
+        """Initialize the main window with frameless styling and dark theme."""
         super().__init__()
         self.setWindowTitle("SuperShredder - Integrated")
         self.resize(900, 600)
 
-        # Remove default title bar for that custom hacker look
+        # Configure frameless window with translucent background
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
-        # Apply the global stylesheet
-        # FIX 1: We specifically force the QMainWindow background to be transparent.
         self.setStyleSheet(STYLESHEET + "\nQMainWindow { background: transparent; }")
 
         self.init_ui()
         self._drag_pos = None
 
     def init_ui(self):
-        # Main Container (Rounded, Dark)
+        """
+        Initialize the user interface components.
+        
+        Creates the main layout with:
+        - Rounded container with gradient background
+        - Left sidebar with navigation buttons and window controls
+        - Right content area with stacked widget for tab switching
+        """
+        # Main container with rounded corners and gradient background
         container = QFrame()
         container.setObjectName("container")
-        # FIX 3: Moved the gradient to the container so the background respects the border radius.
         container.setStyleSheet("""
             QFrame#container {
                 background: qlineargradient(x1:0 y1:0, x2:1 y2:1, stop:0 #0f1724, stop:1 #071028);
@@ -60,7 +107,7 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # --- Sidebar ---
+        # Sidebar navigation panel
         sidebar = QFrame()
         sidebar.setStyleSheet(
             "background: rgba(0,0,0,0.3); border-top-left-radius: 20px; border-bottom-left-radius: 20px;")
@@ -68,13 +115,13 @@ class MainWindow(QMainWindow):
         side_layout = QVBoxLayout(sidebar)
         side_layout.setContentsMargins(10, 20, 10, 20)
 
-        # App Title
+        # Application title/logo
         title_lbl = QLabel("SUPER\nSHREDDER")
         title_lbl.setStyleSheet("font-size: 20px; font-weight: bold; color: #2a79ff; padding-bottom: 20px;")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         side_layout.addWidget(title_lbl)
 
-        # Nav Buttons
+        # Navigation buttons for tab switching
         self.btn_windows = QPushButton("💾  File Shredder")
         self.btn_windows.setCheckable(True)
         self.btn_windows.setChecked(True)
@@ -88,9 +135,7 @@ class MainWindow(QMainWindow):
 
         side_layout.addStretch()
 
-        # Window Controls (Close/Min)
-
-        # FIX 2: Added Minimize Button
+        # Window control buttons (minimize, close)
         btn_min = QPushButton("Minimize")
         btn_min.setStyleSheet("""
             QPushButton {
@@ -110,9 +155,8 @@ class MainWindow(QMainWindow):
 
         main_layout.addWidget(sidebar)
 
-        # --- Content Area ---
+        # Main content area with tab container
         content_area = QFrame()
-        # FIX 4: Explicitly style the content area to prevent square corners.
         content_area.setStyleSheet("""
             QFrame {
                 background: transparent;
@@ -136,9 +180,17 @@ class MainWindow(QMainWindow):
         content_layout.addWidget(self.stack)
         main_layout.addWidget(content_area)
 
-    def switch_tab(self, index):
+    def switch_tab(self, index: int):
+        """
+        Switch between Windows and Android tabs.
+        
+        Updates the stacked widget index and applies active/inactive
+        styling to the navigation buttons.
+        
+        Args:
+            index: The tab index (0 for Windows, 1 for Android).
+        """
         self.stack.setCurrentIndex(index)
-        # Update button states
         self.btn_windows.setChecked(index == 0)
         self.btn_android.setChecked(index == 1)
 
@@ -148,37 +200,58 @@ class MainWindow(QMainWindow):
         self.btn_windows.setStyleSheet(active_style if index == 0 else inactive_style)
         self.btn_android.setStyleSheet(active_style if index == 1 else inactive_style)
 
-    # --- Dragging Logic for Frameless Window ---
     def mousePressEvent(self, event):
+        """
+        Handle mouse press for window dragging.
+        
+        Records the initial position when left mouse button is pressed,
+        enabling the frameless window to be dragged.
+        
+        Args:
+            event: The mouse press event.
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
 
     def mouseMoveEvent(self, event):
+        """
+        Handle mouse move for window dragging.
+        
+        Moves the window to follow the cursor when dragging.
+        
+        Args:
+            event: The mouse move event.
+        """
         if event.buttons() == Qt.MouseButton.LeftButton and self._drag_pos:
             self.move(event.globalPosition().toPoint() - self._drag_pos)
             event.accept()
 
 
 def main():
-    # --- TASKBAR ICON FIX START ---
-    # This block tells Windows that this is a unique application (AppUserModelID).
-    # Without this, Windows groups it under a generic "Python" process and ignores your icon.
+    """
+    Application entry point.
+    
+    Initializes the Qt application, sets the Windows taskbar app ID
+    for proper icon display, loads the window icon, and launches
+    the main window.
+    """
+    # Set Windows AppUserModelID for proper taskbar icon grouping
     if sys.platform == 'win32':
-        myappid = 'tarundeep.supershredder.gui.1.0'  # Arbitrary unique string
+        myappid = 'tarundeep.supershredder.gui.1.0'
         try:
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except Exception:
             pass
-    # --- TASKBAR ICON FIX END ---
 
     app = QApplication(sys.argv)
 
-    # Load and set the icon
+    # Load application icon
     icon_path = resource_path("icon.ico")
     if os.path.exists(icon_path):
         app.setWindowIcon(QIcon(icon_path))
 
+    # Create and display main window
     window = MainWindow()
     window.switch_tab(0)
     window.show()

@@ -1,5 +1,25 @@
-# Shared Dark/Gradient Theme
+"""
+@fileoverview Global Stylesheet for SuperShredder GUI
+
+Defines the dark gradient theme used throughout the application.
+Includes styling for all Qt widgets: buttons, inputs, progress bars,
+spinboxes, scrollbars, and checkboxes.
+
+Color Palette:
+    - Primary: #2a79ff (Blue)
+    - Danger: #e63946 (Red)
+    - Background: #0f1724 to #071028 (Dark gradient)
+    - Text: #e6eef8 (Light)
+    - Muted: #8b9bb4 (Gray)
+
+@author Team PD Lovers
+@version 1.0.0
+"""
+
 STYLESHEET = """
+/* ============================================
+   BASE WIDGET STYLES
+   ============================================ */
 QWidget {
     background: qlineargradient(x1:0 y1:0, x2:1 y2:1,
         stop:0 #0f1724, stop:1 #071028);
@@ -7,13 +27,20 @@ QWidget {
     font-family: "Segoe UI", Roboto, Arial;
     font-size: 12px;
 }
+
+/* ============================================
+   CARD CONTAINER STYLES
+   ============================================ */
 QFrame#card {
     background: rgba(20, 28, 38, 230);
     border-radius: 14px;
     padding: 14px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
-/* Title Labels */
+
+/* ============================================
+   TYPOGRAPHY STYLES
+   ============================================ */
 QLabel#title {
     font-size: 18px;
     font-weight: bold;
@@ -23,7 +50,11 @@ QLabel#subtitle {
     font-size: 12px;
     color: #8b9bb4;
 }
-/* Buttons */
+
+/* ============================================
+   BUTTON STYLES
+   Primary, danger, and icon variants
+   ============================================ */
 QPushButton {
     background: qlineargradient(x1:0 y1:0, x2:0 y2:1,
         stop:0 #2a79ff, stop:1 #155edb);
@@ -46,7 +77,10 @@ QPushButton#icon {
     font-size: 16px;
 }
 
-/* Inputs */
+/* ============================================
+   INPUT FIELD STYLES
+   Text inputs, spinboxes, text areas
+   ============================================ */
 QLineEdit, QSpinBox, QTextEdit {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.05);
@@ -59,8 +93,10 @@ QLineEdit:focus, QSpinBox:focus {
     border: 1px solid #2a79ff;
 }
 
-/* --- SPINBOX BUTTONS (SVG Plus/Minus) --- */
-
+/* ============================================
+   SPINBOX BUTTON STYLES
+   Custom plus/minus buttons with SVG icons
+   ============================================ */
 QSpinBox::up-button {
     subcontrol-origin: border;
     subcontrol-position: top right;
@@ -89,24 +125,24 @@ QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
     background: #155edb;
 }
 
-/* We use embedded SVG data URIs to render the symbols. 
-   This avoids the 'square' artifact caused by CSS border hacks. */
-
-/* PLUS SIGN (for Up) */
+/* SVG Plus icon for increment button */
 QSpinBox::up-arrow {
     width: 10px;
     height: 10px;
     image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M4 0h2v10H4zM0 4h10v2H0z' fill='white'/></svg>");
 }
 
-/* MINUS SIGN (for Down) */
+/* SVG Minus icon for decrement button */
 QSpinBox::down-arrow {
     width: 10px;
     height: 10px;
     image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M0 4h10v2H0z' fill='white'/></svg>");
 }
 
-/* Scrollbars */
+/* ============================================
+   SCROLLBAR STYLES
+   Minimal vertical scrollbar design
+   ============================================ */
 QScrollBar:vertical {
     border: none;
     background: rgba(0,0,0,0.1);
@@ -122,7 +158,10 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     height: 0px;
 }
 
-/* Progress Bar */
+/* ============================================
+   PROGRESS BAR STYLES
+   Green gradient fill for progress indication
+   ============================================ */
 QProgressBar {
     background: rgba(255,255,255,0.04);
     border-radius: 8px;
@@ -136,7 +175,10 @@ QProgressBar::chunk {
         stop:0 #3bd67a, stop:1 #16a34a);
 }
 
-/* Checkbox */
+/* ============================================
+   CHECKBOX STYLES
+   Custom checkbox with blue accent
+   ============================================ */
 QCheckBox::indicator {
     width: 16px;
     height: 16px;

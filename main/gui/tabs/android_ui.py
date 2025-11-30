@@ -1,3 +1,20 @@
+"""
+@fileoverview Android Data Wiper Tab UI
+
+Provides the user interface for Android device wiping functionality.
+Automatically detects connected devices via ADB and allows users
+to initiate factory reset or secure wipe operations.
+
+Features:
+    - Automatic device detection via ADB polling
+    - Device status display (authorized, unauthorized, offline)
+    - Confirmation dialog before wipe
+    - Real-time progress and ADB log output
+
+@author Team PD Lovers
+@version 1.0.0
+"""
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QTextEdit, QProgressBar, QFrame, QMessageBox
@@ -7,18 +24,40 @@ from gui.workers import AndroidWipeWorker, DeviceCheckWorker
 
 
 class AndroidTab(QWidget):
+    """
+    Android Data Wiper tab widget.
+    
+    Provides the complete UI for detecting Android devices,
+    displaying device information, and initiating wipe operations.
+    
+    Attributes:
+        worker: The background wipe worker thread.
+        timer: QTimer for periodic device status polling.
+        status_label: Label showing current connection status.
+        lbl_device_details: Label showing connected device info.
+        btn_wipe: Button to initiate the wipe operation.
+        progress: Progress bar for operation status.
+        log_box: Text area for ADB command logs.
+    """
+    
     def __init__(self):
         super().__init__()
         self.worker = None
         self._init_ui()
 
-        # Poll for device connection automatically every 3 seconds
+        # Poll for device connection every 3 seconds
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_device_status)
         self.timer.start(3000)
-        self.check_device_status()  # Initial check
+        self.check_device_status()
 
     def _init_ui(self):
+        """
+        Initialize the tab's user interface components.
+        
+        Creates the layout with device status area, device info box,
+        action buttons, progress bar, and log output.
+        """
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -75,12 +114,23 @@ class AndroidTab(QWidget):
         layout.addWidget(card)
 
     def check_device_status(self):
-        # Run check in background so UI doesn't stutter
+        """
+        Start a background check for connected Android devices.
+        
+        Spawns a DeviceCheckWorker to poll ADB without blocking the UI.
+        """
         self.checker = DeviceCheckWorker()
         self.checker.result.connect(self._update_status_ui)
         self.checker.start()
 
-    def _update_status_ui(self, status, device_id):
+    def _update_status_ui(self, status: str, device_id: str):
+        """
+        Update the UI based on device connection status.
+        
+        Args:
+            status: The device state ('authorized', 'unauthorized', etc.)
+            device_id: The ADB device identifier.
+        """
         if status == 'authorized':
             self.lbl_device_details.setText(f"Connected: {device_id}")
             self.status_label.setText("Status: Ready")
@@ -95,14 +145,16 @@ class AndroidTab(QWidget):
         else:
             self.lbl_device_details.setText("No device detected")
             self.status_label.setText("Status: Waiting for USB connection...")
-            self.status_label.setStyleSheet("color: #8b9bb4;")  # Grey
+            self.status_label.setStyleSheet("color: #8b9bb4;")
             self.btn_wipe.setEnabled(False)
 
-    def _confirm_callback(self, model_name):
-        return True
-
     def start_android_wipe(self):
-        # Ask for confirmation HERE, on the main thread
+        """
+        Initiate the Android wipe operation after user confirmation.
+        
+        Shows a confirmation dialog and starts the wipe worker
+        if the user confirms the action.
+        """
         reply = QMessageBox.question(
             self,
             "Confirm Wipe",
@@ -116,14 +168,23 @@ class AndroidTab(QWidget):
             self.log_box.append("--- Starting Android Wipe Protocol ---")
             self.progress.setValue(0)
 
-            # Pass a dummy callback that always returns True, since we already asked.
+            # Start wipe worker (confirmation already obtained)
             self.worker = AndroidWipeWorker(confirmation_callback=lambda x: True)
             self.worker.signals.log.connect(self.log_box.append)
             self.worker.signals.progress.connect(self.progress.setValue)
             self.worker.signals.finished.connect(self._on_finished)
             self.worker.start()
 
-    def _on_finished(self, success, msg):
+    def _on_finished(self, success: bool, msg: str):
+        """
+        Handle wipe operation completion.
+        
+        Re-enables the UI and shows a success or warning message.
+        
+        Args:
+            success: Whether the operation completed successfully.
+            msg: The completion message to display.
+        """
         self.btn_wipe.setEnabled(True)
         self.progress.setValue(100)
         if success:
