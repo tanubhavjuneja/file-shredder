@@ -1,8 +1,29 @@
+/**
+ * @fileoverview Download Page Component
+ * 
+ * Provides download links and information for the SuperShredder application.
+ * Includes version info, dependency status, and important warnings.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React from 'react';
-import { Download, AlertTriangle, Github, Zap, Shield, Check } from 'lucide-react';
+import { Download, AlertTriangle, Github, Zap, Shield } from 'lucide-react';
 import Button from '../components/Button';
 import SectionHeader from '../components/SectionHeader';
 
+/**
+ * Download Page Component
+ * 
+ * Renders the download section with:
+ * - Version and package information
+ * - Dependency status indicator
+ * - Direct download and source code buttons
+ * - Safety warning about irreversible data destruction
+ * 
+ * @returns {JSX.Element} The download section
+ */
 export default function DownloadPage() {
     return (
         <section id="download" className="relative min-h-screen flex flex-col items-center justify-center py-24 bg-slate-950 overflow-hidden">
@@ -32,7 +53,7 @@ export default function DownloadPage() {
 
                         <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">SuperShredder v1.0.0 (Portable)</h3>
                         <p className="text-slate-400 mb-8 max-w-lg">
-                            Zip archive includes the standalone executable and necessary ADB binaries for a zero-dependency experience.
+                            Pre-packaged standalone executable with bundled necessary ADB binaries for a zero-dependency experience.
                         </p>
 
                         {/* Dependency Status Panel (Replaced Hash) */}
@@ -50,7 +71,6 @@ export default function DownloadPage() {
                             </p>
                         </div>
 
-                        {/* CTA Buttons - Layout Fixed */}
                         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm sm:max-w-none justify-center">
                             <Button
                                 variant="danger"

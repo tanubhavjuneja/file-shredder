@@ -1,54 +1,96 @@
+/**
+ * @fileoverview Interactive App Preview Component
+ * 
+ * This component provides an interactive simulation of the SuperShredder
+ * application directly in the browser. It demonstrates both Windows and
+ * Android wiping functionality with animated terminal output.
+ * 
+ * Features:
+ * - Platform switching (Windows/Android)
+ * - Simulated DoD 5220.22-M and Zero Fill algorithms
+ * - ADB device connection simulation
+ * - Real-time progress and log output
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Monitor,
     Smartphone,
-    Trash2,
     HardDrive,
-    Terminal,
-    AlertCircle,
-    CheckCircle,
     CheckCircle2,
-    Cpu,
     Shield,
-    Settings,
-    Lock,
-    RefreshCw,
-    Usb,
-    Wifi
+    RefreshCw
 } from 'lucide-react';
 import Button from './Button';
 
+/**
+ * Interactive App Preview Component
+ * 
+ * Renders a simulated desktop application interface that demonstrates
+ * the file shredding capabilities for both Windows and Android platforms.
+ * 
+ * @returns {JSX.Element} The interactive preview section
+ */
 export default function AppPreview() {
+    // ==========================================
+    // STATE MANAGEMENT
+    // ==========================================
+    
+    /** @type {['windows'|'android', Function]} Currently active platform tab */
     const [activeTab, setActiveTab] = useState('windows');
 
-    // Windows State
-    const [winAlgorithm, setWinAlgorithm] = useState('DOD'); // 'DOD' | 'ZERO'
+    // ----- Windows-specific State -----
+    /** @type {['DOD'|'ZERO', Function]} Selected wiping algorithm */
+    const [winAlgorithm, setWinAlgorithm] = useState('DOD');
+    /** @type {[string, Function]} Target drive letter (unused in simulation but kept for future) */
     const [winDrive, setWinDrive] = useState('C');
 
-    // Android State
-    const [adbStatus, setAdbStatus] = useState('ZB'); // 'SEARCHING' | 'FOUND' | 'CONNECTED'
+    // ----- Android-specific State -----
+    /** @type {['SEARCHING'|'FOUND'|'CONNECTED', Function]} ADB connection status */
+    const [adbStatus, setAdbStatus] = useState('ZB');
+    /** @type {[string|null, Function]} Currently selected Android device ID */
     const [selectedDevice, setSelectedDevice] = useState(null);
 
-    // Common State
+    // ----- Shared Wiping State -----
+    /** @type {[number, Function]} Current progress percentage (0-100) */
     const [progress, setProgress] = useState(0);
+    /** @type {[boolean, Function]} Whether a wipe operation is in progress */
     const [isWiping, setIsWiping] = useState(false);
+    /** @type {[string, Function]} Current status text for display */
     const [statusText, setStatusText] = useState('IDLE');
+    /** @type {React.RefObject<HTMLDivElement>} Reference for auto-scrolling terminal */
     const scrollRef = useRef(null);
 
+    /** @type {[string[], Function]} Array of terminal log messages */
     const [logs, setLogs] = useState([
         "> SuperShredder Core [Python 3.13] initialized",
         "> Loading Portable ADB Stack... OK",
         "> Ready."
     ]);
 
-    // Auto-scroll logs
+    // ==========================================
+    // SIDE EFFECTS
+    // ==========================================
+
+    /**
+     * Auto-scroll Effect
+     * Automatically scrolls the terminal log container to the bottom
+     * whenever new log entries are added.
+     */
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [logs]);
 
-    // Reset state when switching tabs
+    /**
+     * Tab Switch Effect
+     * Resets the simulation state when switching between Windows and Android tabs.
+     * For Android, initiates a simulated ADB device discovery sequence.
+     */
     useEffect(() => {
         setIsWiping(false);
         setProgress(0);
@@ -66,10 +108,26 @@ export default function AppPreview() {
         }
     }, [activeTab]);
 
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+
+    /**
+     * Appends a message to the terminal log.
+     * Keeps only the last 16 entries to prevent memory bloat.
+     * 
+     * @param {string} msg - The message to add to the log
+     */
     const addLog = (msg) => {
         setLogs(prev => [...prev.slice(-15), `> ${msg}`]);
     };
 
+    /**
+     * Handles device selection in Android mode.
+     * Updates the connection status and logs the connection details.
+     * 
+     * @param {string} device - The device identifier to connect to
+     */
     const handleDeviceSelect = (device) => {
         setSelectedDevice(device);
         setAdbStatus('CONNECTED');
@@ -77,6 +135,14 @@ export default function AppPreview() {
         addLog("Status: ONLINE | USB Debugging: ENABLED");
     };
 
+    // ==========================================
+    // SIMULATION LOGIC
+    // ==========================================
+
+    /**
+     * Initiates the wipe simulation based on the active platform.
+     * Guards against multiple concurrent wipe operations.
+     */
     const runSimulation = () => {
         if (isWiping) return;
         setIsWiping(true);
@@ -90,6 +156,11 @@ export default function AppPreview() {
         }
     };
 
+    /**
+     * Simulates the Windows drive wiping process.
+     * Implements a multi-pass algorithm simulation with sector-level logging.
+     * DoD algorithm runs 3 passes; Zero Fill runs 1 pass.
+     */
     const runWindowsWipe = () => {
         const passes = winAlgorithm === 'DOD' ? 3 : 1;
         addLog(`Target: ${winDrive}:/Users/Admin/Secrets`);
@@ -120,6 +191,10 @@ export default function AppPreview() {
         }, 100);
     };
 
+    /**
+     * Simulates the Android ADB-based wiping process.
+     * Demonstrates the stages: binary push, shell execution, and data wipe.
+     */
     const runAndroidWipe = () => {
         addLog(`Target: /sdcard/ (External Storage)`);
         addLog(`Sending 'wipetool' binary to ${selectedDevice}...`);
@@ -150,6 +225,13 @@ export default function AppPreview() {
         }, 100);
     };
 
+    /**
+     * Completes the wipe simulation and updates the UI.
+     * Clears the interval timer and generates a verification hash.
+     * 
+     * @param {number} interval - The interval ID to clear
+     * @param {string} msg - The completion message to display
+     */
     const completeWipe = (interval, msg) => {
         clearInterval(interval);
         setIsWiping(false);
@@ -159,6 +241,9 @@ export default function AppPreview() {
         addLog("Verification Hash: " + Math.random().toString(36).substring(7).toUpperCase());
     };
 
+    // ==========================================
+    // COMPONENT RENDER
+    // ==========================================
     return (
         <section id="preview" className="relative min-h-screen flex flex-col items-center justify-center py-20 bg-slate-950 overflow-hidden">
 
@@ -229,7 +314,6 @@ export default function AppPreview() {
                         {/* Main Content Area */}
                         <div className="flex-1 bg-slate-950 p-6 md:p-8 flex flex-col">
 
-                            {/* FIX: Fixed height container (h-40) to prevent shift between tabs */}
                             <div className="h-40 mb-6 w-full">
                                 {activeTab === 'windows' && (
                                     <div className="grid grid-cols-2 gap-4 h-full">

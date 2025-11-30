@@ -1,7 +1,32 @@
+/**
+ * @fileoverview Footer Component
+ * 
+ * The site footer containing navigation links, branding, legal disclaimers,
+ * and credits. Provides a consistent bottom section across the application.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React from 'react';
 import { Trash2, Heart, Download, GitBranch, Terminal, Shield, Github } from 'lucide-react';
 
+/**
+ * Footer Component
+ * 
+ * Renders the site footer with:
+ * - Brand logo and tagline
+ * - Navigation and resource links
+ * - Legal disclaimer about data destruction
+ * - Copyright and credits
+ * 
+ * @returns {JSX.Element} The footer section
+ */
 export default function Footer() {
+    /**
+     * Footer navigation links configuration.
+     * Divided into Navigation and Resources sections.
+     */
     const navLinks = [
         { name: 'Features', href: '#features', icon: <Shield className="w-4 h-4 text-blue-500" /> },
         { name: 'Live Demo', href: '#preview', icon: <Terminal className="w-4 h-4 text-purple-500" /> },
@@ -9,6 +34,11 @@ export default function Footer() {
         { name: 'Download', href: '#download', icon: <Download className="w-4 h-4 text-red-500" /> },
     ];
 
+    /**
+     * Handles smooth scrolling to a page section.
+     * 
+     * @param {string} id - The section ID to scroll to (with # prefix)
+     */
     const handleScroll = (id) => {
         const element = document.getElementById(id.replace('#', ''));
         if (element) {

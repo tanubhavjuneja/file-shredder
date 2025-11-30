@@ -1,15 +1,48 @@
+/**
+ * @fileoverview Navigation Bar Component
+ * 
+ * The main navigation component that provides site-wide navigation.
+ * Features responsive design with mobile hamburger menu, scroll-aware
+ * styling, and smooth scroll navigation to page sections.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Trash2, Github, Download, Terminal } from 'lucide-react';
 import Button from './Button';
 
+/**
+ * Navigation Bar Component
+ * 
+ * Renders a fixed navigation bar with responsive mobile menu.
+ * Changes appearance on scroll for better visual hierarchy.
+ * 
+ * @returns {JSX.Element} The navigation bar
+ */
 export default function Navbar() {
+    // ==========================================
+    // STATE
+    // ==========================================
+    
+    /** @type {[boolean, Function]} Mobile menu open state */
     const [isOpen, setIsOpen] = useState(false);
+    /** @type {[boolean, Function]} Whether page has been scrolled */
     const [scrolled, setScrolled] = useState(false);
 
-    // Constant height navbar for fixed top offset
+    /** Height of navbar in pixels for mobile menu positioning */
     const NAVBAR_HEIGHT_PX = 88;
 
-    // Add scroll listener to change navbar appearance when scrolling down
+    // ==========================================
+    // EFFECTS
+    // ==========================================
+
+    /**
+     * Scroll Detection Effect
+     * Updates the scrolled state based on window scroll position.
+     * Triggers visual changes to the navbar when scrolled past threshold.
+     */
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -18,6 +51,14 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // ==========================================
+    // NAVIGATION CONFIGURATION
+    // ==========================================
+
+    /**
+     * Navigation link definitions.
+     * Each link has a display name, anchor href, and optional icon.
+     */
     const navLinks = [
         { name: 'Live Demo', href: '#preview', icon: <Terminal className="w-4 h-4" /> },
         { name: 'Features', href: '#features' },
@@ -26,6 +67,16 @@ export default function Navbar() {
         { name: 'Support', href: '#contact' },
     ];
 
+    // ==========================================
+    // EVENT HANDLERS
+    // ==========================================
+
+    /**
+     * Handles smooth scrolling to a page section.
+     * Accounts for fixed header offset and closes mobile menu.
+     * 
+     * @param {string} id - The section ID to scroll to (with # prefix)
+     */
     const handleScroll = (id) => {
         const element = document.getElementById(id.replace('#', ''));
         if (element) {
@@ -152,7 +203,6 @@ export default function Navbar() {
 
                         <Button
                             variant="danger"
-                            // FIX: Added 'gap-3' to ensure proper spacing between the icon and text.
                             className="w-full flex items-center justify-center gap-3 py-4 text-lg whitespace-nowrap"
                             onClick={() => handleScroll('#download')}
                         >

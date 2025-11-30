@@ -1,10 +1,34 @@
+/**
+ * @fileoverview Documentation/Guide Page Component
+ * 
+ * Provides user and developer documentation with tabbed interface.
+ * Includes step-by-step usage instructions and development setup guide.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React, { useState } from 'react';
-import { Terminal, Play, Cpu, Download, ChevronRight, Command, Shield, GitBranch, Box, Hammer } from 'lucide-react';
+import { Terminal, Play, Cpu, Download, Shield, GitBranch, Hammer } from 'lucide-react';
 import SectionHeader from '../components/SectionHeader';
 
+/**
+ * Guide Page Component
+ * 
+ * Renders a tabbed documentation section with:
+ * - User Manual: Step-by-step usage guide in card format
+ * - Developer Guide: Terminal-style setup instructions
+ * 
+ * @returns {JSX.Element} The documentation section
+ */
 export default function GuidePage() {
-    const [activeTab, setActiveTab] = useState('user'); // 'user' or 'dev'
+    /** @type {['user'|'dev', Function]} Currently active documentation tab */
+    const [activeTab, setActiveTab] = useState('user');
 
+    /**
+     * User manual steps configuration.
+     * Each step has a number, title, description, and icon.
+     */
     const userSteps = [
         {
             num: "01",
@@ -32,6 +56,10 @@ export default function GuidePage() {
         }
     ];
 
+    /**
+     * Developer setup steps configuration.
+     * Each step includes a title, description, and terminal commands.
+     */
     const devSteps = [
         {
             step: "1. Clone Repository",

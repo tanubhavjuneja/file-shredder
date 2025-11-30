@@ -1,7 +1,26 @@
+/**
+ * @fileoverview Global Styles for SuperShredder Frontend
+ * 
+ * This stylesheet contains:
+ * - Tailwind CSS directives for utility-first styling
+ * - CSS custom properties (variables) for theming
+ * - Custom scrollbar styling for webkit browsers
+ * - Animation keyframes for UI effects
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
+/* ============================================
+   TAILWIND CSS DIRECTIVES
+   ============================================ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   ROOT VARIABLES & BASE STYLES
+   ============================================ */
 :root {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
@@ -17,6 +36,9 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* ============================================
+   BODY & LAYOUT STYLES
+   ============================================ */
 body {
     margin: 0;
     display: flex;
@@ -31,7 +53,10 @@ body {
     margin: 0 auto;
 }
 
-/* Custom Scrollbar */
+/* ============================================
+   CUSTOM SCROLLBAR STYLES
+   Applies to webkit browsers (Chrome, Safari, Edge)
+   ============================================ */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -46,7 +71,15 @@ body {
     background: #475569;
 }
 
-/* Utilities */
+/* ============================================
+   ANIMATION UTILITIES
+   Custom animations for UI transitions
+   ============================================ */
+
+/**
+ * Fade-in animation with upward slide effect.
+ * Used for revealing elements smoothly on page load.
+ */
 .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
 }

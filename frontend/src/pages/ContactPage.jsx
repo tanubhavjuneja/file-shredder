@@ -1,17 +1,58 @@
+/**
+ * @fileoverview Contact Page Component
+ * 
+ * Provides a contact form for users to submit feedback, bug reports,
+ * or feature requests. Integrates with the backend API for form submission.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React, { useState } from 'react';
 import { Send, CheckCircle, AlertCircle, Mail, MessageSquare } from 'lucide-react';
 import SectionHeader from '../components/SectionHeader';
 import Button from '../components/Button';
-import { api } from '../services/api'; // Import the API
+import { api } from '../services/api';
 
+/**
+ * Contact Page Component
+ * 
+ * Renders a contact form with:
+ * - Email input field
+ * - Message textarea
+ * - Submit button with loading state
+ * - Success/error feedback messages
+ * 
+ * Form states:
+ * - 'idle': Ready for input
+ * - 'sending': Submission in progress
+ * - 'sent': Successfully submitted
+ * - 'error': Submission failed
+ * 
+ * @returns {JSX.Element} The contact section
+ */
 export default function ContactPage() {
-    const [status, setStatus] = useState('idle'); // idle, sending, sent, error
+    /** @type {['idle'|'sending'|'sent'|'error', Function]} Form submission status */
+    const [status, setStatus] = useState('idle');
+    
+    /** @type {[{email: string, message: string}, Function]} Form field values */
     const [formData, setFormData] = useState({ email: '', message: '' });
 
+    /**
+     * Updates form data when input fields change.
+     * 
+     * @param {React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>} e - The change event
+     */
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
+    /**
+     * Handles form submission.
+     * Sends data to the backend API and updates status accordingly.
+     * 
+     * @param {React.FormEvent<HTMLFormElement>} e - The form submit event
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setStatus('sending');
@@ -19,7 +60,7 @@ export default function ContactPage() {
         try {
             await api.submitContactForm(formData);
             setStatus('sent');
-            setFormData({ email: '', message: '' }); // Clear form
+            setFormData({ email: '', message: '' });
         } catch (error) {
             setStatus('error');
         }

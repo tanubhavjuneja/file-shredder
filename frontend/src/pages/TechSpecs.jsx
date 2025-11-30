@@ -1,7 +1,27 @@
+/**
+ * @fileoverview Technical Specifications Component
+ * 
+ * Provides detailed technical information about the SuperShredder engine,
+ * including destruction algorithms and system architecture details.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React from 'react';
-import { ShieldAlert, FileCode, Cpu, Layers, Terminal, Lock, AlertTriangle, Zap } from 'lucide-react';
+import { ShieldAlert, FileCode, Cpu, Layers, Terminal, AlertTriangle } from 'lucide-react';
 import SectionHeader from '../components/SectionHeader';
 
+/**
+ * Technical Specifications Component
+ * 
+ * Renders a two-column layout displaying:
+ * - Left: Destruction algorithms (DoD 5220.22-M, Zero Fill, Cryptographic Random)
+ * - Right: System architecture (Python core, ADB stack, sector-level access)
+ * - Safety warning about fail-safe protocols
+ * 
+ * @returns {JSX.Element} The tech specs section
+ */
 export default function TechSpecs() {
     return (
         <section id="specs" className="relative min-h-screen flex flex-col justify-center py-24 bg-slate-950 overflow-hidden">

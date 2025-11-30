@@ -1,8 +1,36 @@
+/**
+ * @fileoverview Hero Section Component
+ * 
+ * The main landing section that visitors see first. Features a bold headline,
+ * value proposition, call-to-action buttons, and animated background effects.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React from 'react';
 import Button from '../components/Button';
 import { Download, ShieldCheck, ChevronRight, ChevronDown, Terminal, Shield } from 'lucide-react';
 
+/**
+ * Hero Section Component
+ * 
+ * Renders the primary landing area with:
+ * - Release badge indicator
+ * - Main headline with gradient text
+ * - Subtitle describing the application
+ * - Primary and secondary CTA buttons
+ * - Feature pills highlighting key benefits
+ * - Animated scroll indicator
+ * 
+ * @returns {JSX.Element} The hero section
+ */
 export default function HeroSection() {
+    /**
+     * Scrolls smoothly to a target section.
+     * 
+     * @param {string} id - The ID of the element to scroll to
+     */
     const scrollTo = (id) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };

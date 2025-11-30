@@ -1,8 +1,35 @@
+/**
+ * @fileoverview Features Grid Component
+ * 
+ * Displays the key features of SuperShredder in an attractive grid layout.
+ * Each feature card highlights a specific capability with icon and description.
+ * 
+ * @author Team PD Lovers
+ * @version 1.0.0
+ */
+
 import React from 'react';
-import { Shield, Zap, Lock, RefreshCw, Smartphone, HardDrive, Fingerprint, EyeOff, Server } from 'lucide-react';
+import { Shield, Zap, Lock, RefreshCw, Smartphone, HardDrive } from 'lucide-react';
 import SectionHeader from '../components/SectionHeader';
 
+/**
+ * Features Grid Component
+ * 
+ * Renders a responsive grid of feature cards showcasing:
+ * - Military-grade standards (DoD 5220.22-M)
+ * - Android ADB integration
+ * - Native Windows engine
+ * - Irreversible destruction
+ * - Zero-config discovery
+ * - Portable operation
+ * 
+ * @returns {JSX.Element} The features grid section
+ */
 export default function FeaturesGrid() {
+    /**
+     * Feature definitions for the grid.
+     * Each feature has an icon, title, and description.
+     */
     const features = [
         {
             icon: <Shield className="w-8 h-8 text-blue-500" />,
