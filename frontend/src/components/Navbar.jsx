@@ -193,7 +193,7 @@ export default function Navbar() {
 
                     <div className="pt-4 border-t border-slate-800 space-y-2">
                         <a
-                            href="https://github.com/tarundeep1608/supershredder"
+                            href="https://github.com/tanubhavjuneja/file-shredder"
                             target="_blank"
                             rel="noreferrer"
                             className="w-full justify-center flex items-center gap-3 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800/80 px-4 py-4 rounded-md text-lg font-medium transition-colors"

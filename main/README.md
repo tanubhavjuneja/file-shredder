@@ -33,8 +33,8 @@
 ### Steps
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/tarundeep1608/supershredder
-    cd supershredder
+    git clone https://github.com/tanubhavjuneja/file-shredder
+    cd file-shredder/main
     ```
 
 2.  **Install Dependencies**

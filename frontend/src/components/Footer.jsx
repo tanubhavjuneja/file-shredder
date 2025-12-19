@@ -100,7 +100,7 @@ export default function Footer() {
                                 </li>
                             ))}
                             <li>
-                                <a href="https://github.com/tarundeep1608/supershredder" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-2">
+                                <a href="https://github.com/tanubhavjuneja/file-shredder" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-2">
                                     <Github className="w-4 h-4 text-slate-500" /> GitHub Repo
                                 </a>
                             </li>

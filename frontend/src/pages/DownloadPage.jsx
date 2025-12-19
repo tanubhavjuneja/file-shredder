@@ -83,7 +83,7 @@ export default function DownloadPage() {
                             <Button
                                 variant="secondary"
                                 className="w-full sm:w-auto flex items-center justify-center gap-2 py-3.5 text-lg"
-                                onClick={() => window.open('https://github.com/tarundeep1608/SuperShredder', '_blank')}
+                                onClick={() => window.open('https://github.com/tanubhavjuneja/file-shredder', '_blank')}
                             >
                                 <Github className="w-5 h-5" /> View Source Code
                             </Button>

@@ -64,7 +64,7 @@ export default function GuidePage() {
         {
             step: "1. Clone Repository",
             desc: "Get the latest source code from GitHub.",
-            cmd: "git clone https://github.com/tarundeep1608/SuperShredder.git\ncd SuperShredder"
+            cmd: "git clone https://github.com/tanubhavjuneja/file-shredder.git\ncd file-shredder/main"
         },
         {
             step: "2. Run from Source",
