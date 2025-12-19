@@ -1,118 +1,80 @@
-##  Super Shredder: Secure Data Wiping Tool
+# SuperShredder
 
-This repository hosts the complete source code for **Super Shredder**, a robust, cross-platform application designed to securely and permanently wipe files and directories, preventing forensic data recovery. It also includes the code for the companion landing page, built with Django and React, to promote the tool.
+**SuperShredder** is a powerful, cross-platform security tool designed to securely erase data from Windows file systems and Android devices. Built with a modern, "hacker-style" frameless GUI using PyQt6, it ensures that deleted files are unrecoverable by utilizing military-grade encryption and multi-pass overwriting techniques.
+**Self-Contained & Portable:** This tool comes with bundled ADB binaries, eliminating the need for complex system configuration. It also includes a build script to compile the application into a standalone `.exe` file.
 
------
+## 🚀 Features
 
-##  Key Features
+### 🖥️ Windows File Shredder
+* **AES Encryption In-Place:** Before deletion, file content is overwritten with encrypted noise using AES (CBC mode) with a random key and IV.
+* **Secure Overwrite:** Performs multiple passes of random data overwrites to ensure magnetic remanence cannot be used to recover data.
+* **Metadata Obfuscation:** Renames files to random UUIDs before deletion to hide original filenames.
+* **Free Space Wiping:** Fills free disk space with random data to prevent recovery of previously deleted files.
 
-  * **Secure Wiping Algorithms:** Implements industry-standard algorithms (e.g., [mention specific standards like DoD 5220.22-M or Gutmann] - *if applicable*) to overwrite data multiple times.
-  * **Cross-Platform Core:** The core wiping logic, contained in the `main` directory, is designed for broad operating system compatibility.
-  * **Intuitive GUI:** A user-friendly graphical interface built with Python/Qt (in the `main/gui` directory) for easy file selection and shredding.
-  * **Modern Landing Page:** A responsive web front-end built with **Django** and **React** for promotion, documentation, and download links.
+### 📱 Android Wiper
+* **Smart Strategy Detection:** Automatically determines the best wiping method based on the device's Android version and encryption state.
+    * **Crypto Wipe:** Used for encrypted devices (Android 6+).
+    * **Factory Reset/Overwrite:** Used for older devices or emulators.
+* **Device Management:** Auto-detects device states (Authorized, Unauthorized, Offline) and guides the user through ADB connection steps.
+* **Emulator Support:** Detects if the connected device is an emulator and adjusts the wiping command accordingly.
 
------
+### 🎨 User Interface
+* **Modern Dark Theme:** Custom-styled, frameless window with a translucent background and rounded corners.
+* **Easy Navigation:** Sidebar navigation to switch between Windows and Android modules.
+* **Integrated Controls:** Custom minimize and exit buttons integrated into the UI.
 
-## 💻 Repository Structure
+---
 
-The project is logically divided into three main components:
-
-| Directory | Purpose | Tech Stack |
-| :--- | :--- | :--- |
-| **`main`** | **The Core Super Shredder Application.** Contains the secure wiping logic, command-line utility, and GUI source code and a build.py for making executables. | Python, PyQt/Tkinter (GUI) |
-| **`backend`** | **Django Backend** for serving the  potential API endpoints for the  contact form. | Django (Python) |
-| **`frontend`** | **React Frontend** code for the **Landing Page** UI. | React, JavaScript, Vite/Webpack, Tailwind CSS |
-
-
------
-
-## 🛠️ Getting Started
-
-Follow these steps to set up and run the entire project locally.
+## 🛠️ Installation
 
 ### Prerequisites
+* Python 3.x
 
-1.  **Python 3.x**
-2.  **Node.js & npm/yarn**
-3.  **Git** (to clone the repository)
+### Steps
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/tanubhavjuneja/file-shredder
+    cd supershredder/main
+    ```
 
-### 1\. Set Up the Python Environment (Backend & Main App)
+2.  **Install Dependencies**
+    Install the required Python packages using pip:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-From the project root directory (`file-shredder`):
+3.  **Run the Application**
+    You have two options to run SuperShredder:
 
-```bash
-# Create a New Virtual Envionment and activate it 
- python3 -m venv fsenv
- source fsenv/bin/activate
+Option A: Run from Source Launch the application directly using Python:  
+   ```bash
+   python main.py
+   ```   
+    
+Option B: Build Standalone Executable. Use the provided build script to create a portable .exe file. This will bundle all dependencies and the ADB binaries into a single file.
+   ```bash
+   python build.py
+   ```
 
-# Install Backend dependencies
-pip install -r backend/requirements.txt
+The build script checks for adb.exe and DLLs in the bin/ folder and bundles them.
+Once finished, the executable will be available at: dist/SuperShredder.exe
+   
 
-# Install Main App dependencies (if any separate requirements exist)
-pip install -r main/requirements.txt
-```
+---
 
-### 2\. Set Up the Frontend (Landing Page)
+## 📖 Usage
 
-Navigate to the `frontend` directory and install dependencies:
+### Windows Tab
+1.  Select the **File Shredder** tab from the sidebar.
+2.  Choose the file or directory you wish to shred.
+3.  The application will encrypt the content, overwrite it multiple times, rename the file, and finally delete it.
 
-```bash
-cd frontend
-npm install # or yarn install
-```
+### Android Tab
+1.  Connect your Android device via USB and ensure **USB Debugging** is enabled.
+2.  Select the **Android Wiper** tab.
+3.  The tool will detect your device. If authorized, it will display the device profile.
+4.  Click to start the wipe. The tool will execute the appropriate strategy (Crypto Wipe or Factory Reset).
 
------
-
-## 🚀 Running the Project
-
-### 1\. Running the Super Shredder Application (Core)
-
-To test the core functionality, you can run the main file shredder application directly:
-
-```bash
-# Ensure fsenv is active
-cd main
-python main.py
-```
-
-This will launch the application GUI.
-
-### 2\. Running the Landing Page (Django + React)
-
-Start the React development server for the frontend assets:
-
-```bash
-# In Terminal 1
-cd frontend
-npm start
-```
-
-Start the Django development server (which will serve the API and the combined page):
-
-```bash
-# In Terminal 2, ensure fsenv is active
-cd backend
-python manage.py runserver
-```
-
-Access the landing page at http://localhost:5173 
-
------
-
-## 🤝 Contributing
-
-We welcome contributions\! Please see the guidelines below:
-
-1.  Fork the Project.
-2.  Create your Feature Branch (`git checkout -b feature/NewAlgorithm`).
-3.  Commit your Changes (`git commit -m 'Feat: Added new Gutmann wipe method'`).
-4.  Push to the Branch (`git push origin feature/NewAlgorithm`).
-5.  Open a Pull Request.
-
------
-
-
-
+---
 ## ⚠️ Disclaimer
-
-SuperShredder is a destructive tool. Files deleted with this tool cannot be recovered. The Android wiper may perform a factory reset on connected devices. The developers are not responsible for any data loss or damage caused by the misuse of this software. Use with caution
+SuperShredder is a destructive tool. Files deleted with this tool cannot be recovered. The Android wiper may perform a factory reset on connected devices. The developers are not responsible for any data loss or damage caused by the misuse of this software. Use with caution.
